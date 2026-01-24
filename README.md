@@ -1,4 +1,4 @@
-GVDB-DUMPER (or dconf dump-file)
+gvdb-dumper (or dconf dump-file)
 ====
 
 The `gvdb-dumper` (or `dconf dump-file`) is a CLI program for dumping a binary GVariant Database file into a human-readable ini format to stdout.
