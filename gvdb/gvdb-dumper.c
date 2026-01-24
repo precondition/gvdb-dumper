@@ -3,27 +3,6 @@
 
 #include "gvdb-reader.h"
 
-static void
-add_key (GKeyFile *kf, const gchar *full_key, GVariant *value)
-{
-    /* full_key looks like: /org/gnome/desktop/interface/gtk-theme */
-
-    const gchar *last_slash = strrchr(full_key, '/');
-    if (!last_slash || last_slash == full_key)
-        return;
-
-    gchar *group = g_strndup(full_key + 1, last_slash - full_key - 1);
-    const gchar *key = last_slash + 1;
-
-    gchar *printed = g_variant_print(value, TRUE);
-    g_key_file_set_value(kf, group, key, printed);
-
-    g_free(group);
-    g_free(printed);
-    g_variant_unref(value);
-}
-
-
 /**
  * Comparison function for paths that orders keys before dirs.
  */
