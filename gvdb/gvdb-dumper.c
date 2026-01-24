@@ -110,7 +110,6 @@ add_to_keyfile (GKeyFile    *kf,
     group = g_strndup (dir_dst + 1, n - 2);
 
   items = gvdb_list_dir(table, dir_src, &length);
-  qsort (items, length, sizeof (items[0]), path_compare);
 
   for (gchar **item = items; *item; ++item)
     {
