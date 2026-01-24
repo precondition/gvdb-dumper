@@ -1,28 +1,15 @@
-GVDB
+GVDB-DUMPER (or dconf dump-file)
 ====
 
-GVDB (GVariant Database) is a simple database file format that stores a
-mapping from strings to GVariant values in a way that is extremely
-efficient for lookups.
+The `gvdb-dumper` (or `dconf dump-file`) is a CLI program for dumping a binary GVariant Database file into a human-readable ini format to stdout.
 
-The code is intended to be pulled into projects as a submodule/subproject,
-and it is not shipped as a separately compiled library. It has no API
-guarantees.
+The internal database for `dconf` and `gsettings` uses the GVDB (GVariant Database) format, and is typically stored at `$XDG_CONFIG_HOME/dconf/user`.
 
-A GVDB database table is a single file. It is designed to be memory mapped
-by one or more clients, with accesses to the stored data being fast. The
-storage format has low size overheads, assuming the GVariant formats for
-values do not require much padding or alignment.
+Thanks to this tool, you can achieve the same effect as `dconf dump /` without having to jump through hoops in order to load a given dconf database file into your currently running dconf server, as described in “[How can I view the content of a backup of the dconf database file? [[Unix & Linux StackExchange]]](https://unix.stackexchange.com/questions/199836/how-can-i-view-the-content-of-a-backup-of-the-dconf-database-file#199864)”
 
-Modifying a GVDB table requires writing out the whole file. This is
-relatively slow. `gvdb_table_write_contents()` does this by writing out
-the new file and atomically renaming it over the old one. This means
-that any clients who have memory mapped the old file will need to reload
-their memory mapping.
+The repository is modeled after the official [GVDB repository](https://gitlab.gnome.org/GNOME/gvdb), with the `gvdb-dumper` branch adding `gvdb/gvdb-dumper.c` and modifying `meson.build` to add the `gvdp-dumper` target.
 
-This means that if multiple clients are using a GVDB table, an external
-process is needed to synchronise writes and to notify clients to reload
-the table. `dconf-service` is an example of such a process.
+The dumping logic is closely modeled after [dconf/bin/dconf.c](https://gitlab.gnome.org/GNOME/dconf/-/blob/main/bin/dconf.c), with the dependency on DConfClient replaced by a simple `GvdTable` loaded in memory.
 
 <!--
   SPDX-FileCopyrightText: 2021 Endless OS Foundation, LLC
