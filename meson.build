@@ -32,3 +32,14 @@ meson.override_dependency('gvdb', gvdb_dep)
 if get_option('tests')
   subdir('gvdb/tests')
 endif
+
+
+gvdb_dumper = executable(
+  'gvdb-dumper',
+  'gvdb/gvdb-dumper.c',
+  dependencies: [
+    gvdb_dep,
+    dependency('glib-2.0'),
+    dependency('gio-2.0'),
+  ],
+)
