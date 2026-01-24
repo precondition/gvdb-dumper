@@ -1,6 +1,4 @@
 #include <string.h>
-//#include <gio/gio.h>
-
 #include "gvdb-reader.h"
 
 /**
