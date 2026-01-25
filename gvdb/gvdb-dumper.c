@@ -2,22 +2,55 @@
 #include "gvdb-reader.h"
 
 /**
- * Comparison function for paths that orders keys before dirs.
+ * Hierarchical lexicographic order.
+ * @param a first path
+ * @param b second path
+ * @return negative value if a < b, 0 if a == b, positive value if a > b
  */
 static gint
 path_compare (const void *a,
               const void *b)
 {
-  const gchar *as = *(const gchar **)a;
-  const gchar *bs = *(const gchar **)b;
+    const gchar *as = *(const gchar **)a;
+    const gchar *bs = *(const gchar **)b;
 
-  const gboolean a_is_dir = !!g_str_has_suffix (as, "/");
-  const gboolean b_is_dir = !!g_str_has_suffix (bs, "/");
+    const gchar *pa = as;
+    const gchar *pb = bs;
 
-  if (a_is_dir != b_is_dir)
-    return a_is_dir - b_is_dir;
-  else
-    return strcmp (as, bs);
+    while (*pa && *pb) {
+        /* find next component */
+        const gchar *a_slash = strchr(pa, '/');
+        const gchar *b_slash = strchr(pb, '/');
+
+        gsize a_len = a_slash ? (gsize)(a_slash - pa) : strlen(pa);
+        gsize b_len = b_slash ? (gsize)(b_slash - pb) : strlen(pb);
+
+        const bool a_terminal = a_slash == NULL;
+        const bool b_terminal = b_slash == NULL;
+        if (a_terminal && !b_terminal)
+            return -1;
+        else if (!a_terminal && b_terminal)
+            return 1;
+
+        gint cmp = strncmp(pa, pb, MIN(a_len, b_len));
+        if (cmp != 0)
+            return cmp;
+
+        if (a_len != b_len)
+            return (a_len < b_len) ? -1 : 1;
+
+        /* advance to next component */
+        pa = a_slash ? a_slash + 1 : pa + a_len;
+        pb = b_slash ? b_slash + 1 : pb + b_len;
+    }
+
+    /* one path ended */
+    if (*pa)
+        return 1;
+    if (*pb)
+        return -1;
+
+    return 0;
 }
 
 static gchar **
@@ -41,15 +74,8 @@ gvdb_list_dir (GvdbTable *table,
 
         const gchar *slash = strchr (rest, '/');
 
-        if (slash) {
-            /* directory */
-            gsize len = slash - rest + 1;
-            gchar *entry = g_strndup (rest, len);
-            g_ptr_array_add (items, entry);
-        } else {
-            /* key */
-            g_ptr_array_add (items, g_strdup (rest));
-        }
+        /* key */
+        g_ptr_array_add (items, g_strdup (rest));
     }
 
     g_strfreev (names);
@@ -69,7 +95,6 @@ add_to_keyfile (GKeyFile    *kf,
                 const gchar *dir_src,
                 const gchar *dir_dst)
 {
-  g_autofree gchar *group = NULL;
   g_auto(GStrv) items = NULL;
   gint length;
   gsize n;
@@ -81,30 +106,19 @@ add_to_keyfile (GKeyFile    *kf,
   n = strlen (dir_dst);
   g_assert (n >= 1 && dir_dst[n - 1] == '/');
 
-  if (g_str_equal (dir_dst, "/"))
-    group = g_strdup ("/");
-  else
-    group = g_strndup (dir_dst + 1, n - 2);
-
   items = gvdb_list_dir(table, dir_src, &length);
 
   for (gchar **item = items; *item; ++item)
     {
-      g_autofree gchar *path = g_strconcat (dir_src, *item, NULL);
+      g_autofree const gchar *path = g_strconcat (dir_src, *item, NULL);
+      g_autofree const gchar *group = g_path_get_dirname (*item);
+      g_autofree const gchar *field = g_path_get_basename (*item);
 
-      if (g_str_has_suffix (*item, "/"))
+      g_autoptr(GVariant) value = gvdb_table_get_value (table, path);
+      if (value != NULL)
         {
-          g_autofree gchar *subdir = g_strconcat (dir_dst, *item, NULL);
-          add_to_keyfile (kf, table, path, subdir);
-        }
-      else
-        {
-          g_autoptr(GVariant) value = gvdb_table_get_value (table, path);
-          if (value != NULL)
-            {
-              g_autofree gchar *value_str = g_variant_print (value, TRUE);
-              g_key_file_set_value (kf, group, *item, value_str);
-            }
+          g_autofree const gchar *value_str = g_variant_print (value, TRUE);
+          g_key_file_set_value (kf, group, field, value_str);
         }
     }
 }
