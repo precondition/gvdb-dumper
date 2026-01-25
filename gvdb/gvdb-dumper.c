@@ -17,13 +17,14 @@ path_compare (const void *a,
     const gchar *pa = as;
     const gchar *pb = bs;
 
-    while (*pa && *pb) {
+    while (*pa && *pb)
+      {
         /* find next component */
-        const gchar *a_slash = strchr(pa, '/');
-        const gchar *b_slash = strchr(pb, '/');
+        const gchar *a_slash = strchr (pa, '/');
+        const gchar *b_slash = strchr (pb, '/');
 
-        gsize a_len = a_slash ? (gsize)(a_slash - pa) : strlen(pa);
-        gsize b_len = b_slash ? (gsize)(b_slash - pb) : strlen(pb);
+        gsize a_len = a_slash ? (gsize)(a_slash - pa) : strlen (pa);
+        gsize b_len = b_slash ? (gsize)(b_slash - pb) : strlen (pb);
 
         const bool a_terminal = a_slash == NULL;
         const bool b_terminal = b_slash == NULL;
@@ -32,7 +33,7 @@ path_compare (const void *a,
         else if (!a_terminal && b_terminal)
             return 1;
 
-        gint cmp = strncmp(pa, pb, MIN(a_len, b_len));
+        gint cmp = strncmp (pa, pb, MIN(a_len, b_len));
         if (cmp != 0)
             return cmp;
 
@@ -42,7 +43,7 @@ path_compare (const void *a,
         /* advance to next component */
         pa = a_slash ? a_slash + 1 : pa + a_len;
         pb = b_slash ? b_slash + 1 : pb + b_len;
-    }
+      }
 
     /* one path ended */
     if (*pa)
@@ -62,7 +63,8 @@ gvdb_list_dir (GvdbTable *table,
     GPtrArray *items = g_ptr_array_new_with_free_func (g_free);
     gsize dir_len = strlen (dir);
 
-    for (gchar **n = names; *n; n++) {
+    for (gchar **n = names; *n; n++)
+      {
         const gchar *path = *n;
 
         if (!g_str_has_prefix (path, dir))
@@ -74,7 +76,7 @@ gvdb_list_dir (GvdbTable *table,
 
         /* key */
         g_ptr_array_add (items, g_strdup (rest));
-    }
+      }
 
     g_strfreev (names);
 
@@ -95,7 +97,7 @@ add_to_keyfile (GKeyFile    *kf,
   g_auto(GStrv) items = NULL;
   gint length;
 
-  items = gvdb_list_dir(table, dir_src, &length);
+  items = gvdb_list_dir (table, dir_src, &length);
 
   for (gchar **item = items; *item; ++item)
     {
@@ -115,31 +117,33 @@ add_to_keyfile (GKeyFile    *kf,
 int
 main (int argc, char **argv)
 {
-    if (argc != 2) {
-        g_printerr("usage: %s <dconf-gvdb-file>\n", argv[0]);
+    if (argc != 2)
+      {
+        g_printerr ("usage: %s <dconf-gvdb-file>\n", argv[0]);
         return 1;
-    }
+      }
 
-    GError *error = NULL;
-    GvdbTable *table = gvdb_table_new(argv[1], TRUE, &error);
-    if (!table) {
-        g_printerr("Failed to open GVDB: %s\n", error->message);
-        g_error_free(error);
+    GError *error = nullptr;
+    GvdbTable *table = gvdb_table_new (argv[1], TRUE, &error);
+    if (!table)
+      {
+        g_printerr ("Failed to open GVDB: %s\n", error->message);
+        g_error_free (error);
         return 1;
-    }
+      }
 
-    GKeyFile *kf = g_key_file_new();
+    GKeyFile *kf = g_key_file_new ();
 
     add_to_keyfile (kf, table, "/");
 
-    gvdb_table_free(table);
+    gvdb_table_free (table);
 
     gsize length;
-    gchar *data = g_key_file_to_data(kf, &length, NULL);
-    g_key_file_unref(kf);
+    gchar *data = g_key_file_to_data (kf, &length, nullptr);
+    g_key_file_unref (kf);
 
-    g_print("%s", data);
-    g_free(data);
+    g_print ("%s", data);
+    g_free (data);
 
     return 0;
 }
