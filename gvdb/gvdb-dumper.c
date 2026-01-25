@@ -72,8 +72,6 @@ gvdb_list_dir (GvdbTable *table,
         if (*rest == '\0')
             continue;
 
-        const gchar *slash = strchr (rest, '/');
-
         /* key */
         g_ptr_array_add (items, g_strdup (rest));
     }
@@ -96,7 +94,6 @@ add_to_keyfile (GKeyFile    *kf,
 {
   g_auto(GStrv) items = NULL;
   gint length;
-  gsize n;
 
   items = gvdb_list_dir(table, dir_src, &length);
 
