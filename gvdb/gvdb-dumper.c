@@ -92,19 +92,11 @@ gvdb_list_dir (GvdbTable *table,
 static void
 add_to_keyfile (GKeyFile    *kf,
                 GvdbTable *table,
-                const gchar *dir_src,
-                const gchar *dir_dst)
+                const gchar *dir_src)
 {
   g_auto(GStrv) items = NULL;
   gint length;
   gsize n;
-
-  /* Key-file group names are formed by removing initial and trailing slash
-   * from dir name, with the singular exception of root dir whose group name
-   * is just "/". */
-
-  n = strlen (dir_dst);
-  g_assert (n >= 1 && dir_dst[n - 1] == '/');
 
   items = gvdb_list_dir(table, dir_src, &length);
 
@@ -141,7 +133,7 @@ main (int argc, char **argv)
 
     GKeyFile *kf = g_key_file_new();
 
-    add_to_keyfile (kf, table, "/", "/");
+    add_to_keyfile (kf, table, "/");
 
     gvdb_table_free(table);
 
