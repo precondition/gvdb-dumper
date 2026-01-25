@@ -24,7 +24,17 @@ Simply delete the executable `gvdb-dumper` file. This is a simple self-contained
 Inspect current dconf gsettings:
 
 ```sh
-$ gvdb-dumper ~/.config/dconf/user
+$ gvdb-dumper ~/.config/dconf/user | head
+[ca/desrt/dconf-editor]
+saved-pathbar-path='/com/github/stunkymonkey/nautilus-open-any-terminal/terminal'
+saved-view='/com/github/stunkymonkey/nautilus-open-any-terminal/terminal'
+show-warning=false
+window-height=500
+window-is-maximized=false
+window-width=540
+
+[com/github/stunkymonkey/nautilus-open-any-terminal]
+terminal='alacritty'
 ```
 
 The above command should be the same as running `dconf dump /`:
