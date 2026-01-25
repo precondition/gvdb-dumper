@@ -119,7 +119,12 @@ main (int argc, char **argv)
 {
     if (argc != 2)
       {
-        g_printerr ("usage: %s <dconf-gvdb-file>\n", argv[0]);
+        g_printerr (
+            "Usage: %s FILE\n\n"
+            "Dump an entire GVDB (GVariant Database) file to stdout\n\n"
+            "Arguments:\n"
+            "  FILE        Path to a GVDB file (e.g. $HOME/.config/dconf/user)\n",
+            argv[0]);
         return 1;
       }
 
