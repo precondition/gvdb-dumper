@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdbool.h>
 #include "gvdb-reader.h"
 
 /**
@@ -128,7 +129,7 @@ main (int argc, char **argv)
         return 1;
       }
 
-    GError *error = nullptr;
+    GError *error = NULL;
     GvdbTable *table = gvdb_table_new (argv[1], TRUE, &error);
     if (!table)
       {
@@ -144,7 +145,7 @@ main (int argc, char **argv)
     gvdb_table_free (table);
 
     gsize length;
-    gchar *data = g_key_file_to_data (kf, &length, nullptr);
+    gchar *data = g_key_file_to_data (kf, &length, NULL);
     g_key_file_unref (kf);
 
     g_print ("%s", data);
